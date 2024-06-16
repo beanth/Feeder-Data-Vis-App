@@ -4,16 +4,16 @@ const API = "http://localhost:3001";
 
 function App() {
 	const [samples, setSamples] = useState([]);
-	const [newSample, setNewSample] = useState("");
 
 	const [foodNumber, setFoodNumber] = useState(13);
 	const [textValue, setTextValue] = useState("");
+
 
 	useEffect(() => {
 		GetDataPoints();
 	}, []);
 
-	const GetDataPoints = () => {
+	async function GetDataPoints() {
 		fetch(API + "/data")
 			.then(response => response.json())
 			.then(data => setSamples(data))
@@ -26,18 +26,35 @@ function App() {
 		const form = e.target;
 		const formData = new FormData(form);
 
-		fetch(API + "/data", {
-			crossDomain: true,
+		const data = await fetch(API + "/data", {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
 			},
 			body: JSON.stringify(Object.fromEntries(formData))
 		})
+			.then(res => res.json())
 			.catch(error => console.error("Error: ", error));
-
+		console.log(data);
+		const newSamples = samples.concat(data);
+		setSamples(newSamples);
 		setFoodNumber(0);
 		setTextValue("");
+	}
+
+	async function handleDelete(e) {
+		const data = await fetch(API + "/data/" + e.target.id, {
+			crossDomain: true,
+			method: 'DELETE',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({})
+		})
+			.then(res => res.json())
+			.catch(error => console.error("Error: ", error));
+
+		setSamples(samples => samples.filter(sample => sample._id !== data._id));
 	}
 
 	return (
@@ -52,13 +69,13 @@ function App() {
 			</form>
 			<div className="samples">
 			{samples.map(samples => (
-				<div className="data" style={{display: "flex", flexDirection: "row", alignItems: "center"}}>
+				<div key={samples._id} className="data" style={{display: "flex", flexDirection: "row", alignItems: "center"}}>
 					<div>
 					{ samples.time }<br/>
 					{ samples.food }
 					&nbsp;{ samples.text }
 					</div>
-					&emsp;<button>X</button>
+					&emsp;<button id={samples._id} onClick={handleDelete}>X</button>
 				</div>
 			))}
 			</div>

@@ -37,15 +37,8 @@ app.post("/data", (req, res) => {
 	res.json(datapoint);
 });
 
-app.delete("/data", (req, res) => {
-	console.log(req.body);
-	const datapoint = new Sample({
-		food: req.body.food,
-		text: req.body.text,
-	});
-
-	datapoint.save();
-
+app.delete("/data/:id", async (req, res) => {
+	const datapoint = await Sample.findByIdAndDelete(req.params.id);
 	res.json(datapoint);
 });
 
