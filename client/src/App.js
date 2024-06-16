@@ -52,10 +52,13 @@ function App() {
 			</form>
 			<div className="samples">
 			{samples.map(samples => (
-				<div className="data">
-					<p>{ samples.text }</p>
-					<p>{ samples.food }</p>
-					<p>{ samples.time }</p>
+				<div className="data" style={{display: "flex", flexDirection: "row", alignItems: "center"}}>
+					<div>
+					{ samples.time }<br/>
+					{ samples.food }
+					&nbsp;{ samples.text }
+					</div>
+					&emsp;<button>X</button>
 				</div>
 			))}
 			</div>
