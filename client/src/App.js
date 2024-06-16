@@ -35,7 +35,6 @@ function App() {
 		})
 			.then(res => res.json())
 			.catch(error => console.error("Error: ", error));
-		console.log(data);
 		const newSamples = samples.concat(data);
 		setSamples(newSamples);
 		setFoodNumber(0);

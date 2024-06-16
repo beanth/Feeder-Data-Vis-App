@@ -18,15 +18,12 @@ mongoose.connect("mongodb://127.0.0.1:27017/")
 const Sample = require("./models/Sample");
 
 app.get("/data", async (req, res) => {
-	console.log("Fetching data");
 	const datapoints = await Sample.find();
-	console.log("Data fetched");
 
 	res.json(datapoints);
 });
 
 app.post("/data", (req, res) => {
-	console.log(req.body);
 	const datapoint = new Sample({
 		food: req.body.food,
 		text: req.body.text,
