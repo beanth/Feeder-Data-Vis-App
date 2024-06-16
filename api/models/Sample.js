@@ -7,7 +7,7 @@ const DataSchema = new Schema({
 	},
 	time: {
 		type: Date,
-		default: new Date().valueOf()
+		default: function() { return Date.now() }
 	},
 	food: {
 		type: Number,
