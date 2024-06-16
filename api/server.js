@@ -25,7 +25,19 @@ app.get("/data", async (req, res) => {
 	res.json(datapoints);
 });
 
-app.post("/data/new", (req, res) => {
+app.post("/data", (req, res) => {
+	console.log(req.body);
+	const datapoint = new Sample({
+		food: req.body.food,
+		text: req.body.text,
+	});
+
+	datapoint.save();
+
+	res.json(datapoint);
+});
+
+app.delete("/data", (req, res) => {
 	console.log(req.body);
 	const datapoint = new Sample({
 		food: req.body.food,

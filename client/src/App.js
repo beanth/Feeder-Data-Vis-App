@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-const API = "http://192.168.1.183:3001";
+const API = "http://localhost:3001";
 
 function App() {
 	const [samples, setSamples] = useState([]);
@@ -25,9 +25,8 @@ function App() {
 
 		const form = e.target;
 		const formData = new FormData(form);
-		console.log(formData);
-		console.log(form);
-		fetch(API + "/data/new", {
+
+		fetch(API + "/data", {
 			crossDomain: true,
 			method: 'POST',
 			headers: {
@@ -36,7 +35,9 @@ function App() {
 			body: JSON.stringify(Object.fromEntries(formData))
 		})
 			.catch(error => console.error("Error: ", error));
+
 		setFoodNumber(0);
+		setTextValue("");
 	}
 
 	return (
