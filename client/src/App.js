@@ -66,6 +66,7 @@ function App() {
 				<br/>
 				<button type="submit">Submit</button>
 			</form>
+			<img src="http://pi.local:5010/"/>
 			<div className="samples">
 			{samples.map(samples => (
 				<div key={samples._id} className="data" style={{display: "flex", flexDirection: "row", alignItems: "center"}}>
