@@ -1,5 +1,5 @@
 const express = require("express");
-const mongoose = require("mongoose");
+const mongoose = require("mongoose"); // MIGRATE TO POSTGRESQL
 const cors = require("cors");
 
 var corsOptions = {
@@ -25,7 +25,7 @@ async function getDataPoints() {
 		}
 	}
 	catch(e) {
-		console.error("ERROR: ", e);
+		console.error("ERROR:", e);
 	}
 	//const datapoint
 }
@@ -34,21 +34,20 @@ getDataPoints();
 
 mongoose.connect("mongodb://127.0.0.1:27017/")
 	.then(() => console.log("Connected to DB"))
-	.then(() => setInterval(getDataPoints, 1000 * 10)) // only want to fetch when we can properly store the data
+	.then(() => setInterval(getDataPoints, 1000 * 10)) // only want to start interval when we can properly store the data
 	.catch((err) => console.error(err));
 
 const Sample = require("./models/Sample");
 
 router.get("/data", async (req, res) => {
-	const datapoints = await Sample.find();
-
+	const datapoints = await Sample.find().sort({"time": 1});
 	res.json(datapoints);
 });
 
-router.post("/data", (req, res) => {
+router.post("/data", async (req, res) => {
 	const datapoint = new Sample({
 		food: req.body.food,
-		text: req.body.text,
+		time: Date.parse(req.body.time)
 	});
 
 	datapoint.save();
