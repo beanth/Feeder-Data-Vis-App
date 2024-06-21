@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, setState } from 'react';
+import CamFeed from './CamFeed';
 
 const API = "http://localhost:3001";
 
@@ -7,8 +8,7 @@ function App() {
 
 	const [foodNumber, setFoodNumber] = useState(13);
 	const [textValue, setTextValue] = useState("");
-
-
+	
 	useEffect(() => {
 		GetDataPoints();
 	}, []);
@@ -66,7 +66,7 @@ function App() {
 				<br/>
 				<button type="submit">Submit</button>
 			</form>
-			<img src="http://pi.local:5010/"/>
+			<CamFeed/>
 			<div className="samples">
 			{samples.map(samples => (
 				<div key={samples._id} className="data" style={{display: "flex", flexDirection: "row", alignItems: "center"}}>
