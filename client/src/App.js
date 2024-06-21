@@ -1,5 +1,6 @@
 import { useState, useEffect, setState } from 'react';
 import CamFeed from './CamFeed';
+import { LineChart, Line, Legend, Tooltip, XAxis, YAxis, CartesianGrid } from 'recharts';
 
 const API = "http://localhost:3001";
 
@@ -25,6 +26,8 @@ function App() {
 
 		const form = e.target;
 		const formData = new FormData(form);
+
+		console.log(Object.fromEntries(formData));
 
 		const data = await fetch(API + "/data", {
 			method: 'POST',
@@ -67,6 +70,15 @@ function App() {
 				<button type="submit">Submit</button>
 			</form>
 			<CamFeed/>
+			<LineChart width={730} height={250} data={samples}
+				margin={{ top: 30, right: 30, left: 30, bottom: 30 }}>
+				<CartesianGrid strokeDasharray="3 3" />
+				<XAxis dataKey="time"/>
+				<YAxis dataKey="food"/>
+				<Tooltip />
+				<Legend />
+				<Line type="linear" dataKey="food" stroke="#82ca9d" />
+			</LineChart>
 			<div className="samples">
 			{samples.map(samples => (
 				<div key={samples._id} className="data" style={{display: "flex", flexDirection: "row", alignItems: "center"}}>
