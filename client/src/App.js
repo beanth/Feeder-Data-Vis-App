@@ -52,15 +52,15 @@ function App() {
 		})
 			.then(res => res.json())
 			.catch(error => console.error("Error: ", error));
-
-		setSamples(samples => samples.filter(sample => sample._id !== data._id));
+		if (data !== null)
+			setSamples(samples => samples.filter(sample => sample._id !== data._id));
 	}
 
 	return (
 		<div className="App">
 			<h1 style={{color: "blue"}}>Cat Feeder</h1>
 			<form onSubmit={handleSubmit}>
-				<input type="text" value={textValue} name="text" onChange={e => setTextValue(e.target.value)}></input>
+				<input type="datetime-local" value={textValue} name="time" onChange={e => setTextValue(e.target.value)}></input>
 				<br/>
 				<input type="number" value={foodNumber} name="food" onChange={e => setFoodNumber(e.target.value)}></input>
 				<br/>
