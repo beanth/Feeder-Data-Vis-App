@@ -12,6 +12,7 @@ function App() {
 	
 	useEffect(() => {
 		GetDataPoints();
+		setInterval(GetDataPoints, 1000 * 10);
 	}, []);
 
 	async function GetDataPoints() {
