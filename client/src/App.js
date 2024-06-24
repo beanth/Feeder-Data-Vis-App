@@ -12,11 +12,14 @@ function App() {
 	
 	useEffect(() => {
 		GetDataPoints();
-		setInterval(GetDataPoints, 1000 * 10);
+		console.log(samples.length);
+		//setInterval(GetDataPoints, 1000 * 10);
 	}, []);
 
 	async function GetDataPoints() {
-		fetch(API + "/data")
+		// TODO:
+		//	OPTIMIZE QUERY TO ONLY FETCH MISSING DATAPOINTS
+		fetch(API + "/data/average")
 			.then(response => response.json())
 			.then(data => setSamples(data))
 			.catch(error => console.error("Error: ", error));
@@ -63,13 +66,6 @@ function App() {
 	return (
 		<div className="App">
 			<h1 style={{color: "blue"}}>Cat Feeder</h1>
-			<form onSubmit={handleSubmit}>
-				<input type="datetime-local" value={textValue} name="time" onChange={e => setTextValue(e.target.value)}></input>
-				<br/>
-				<input type="number" value={foodNumber} name="food" onChange={e => setFoodNumber(e.target.value)}></input>
-				<br/>
-				<button type="submit">Submit</button>
-			</form>
 			<CamFeed/>
 			<LineChart width={730} height={250} data={samples}
 				margin={{ top: 30, right: 30, left: 30, bottom: 30 }}>
@@ -80,7 +76,13 @@ function App() {
 				<Legend />
 				<Line type="linear" dataKey="food" stroke="#82ca9d" />
 			</LineChart>
-			<div className="samples">
+			<form onSubmit={handleSubmit}>
+				<input type="datetime-local" value={textValue} name="time" onChange={e => setTextValue(e.target.value)}></input>
+				<input type="number" value={foodNumber} name="food" onChange={e => setFoodNumber(e.target.value)}></input>
+				<br/>
+				<button type="submit">Submit</button>
+			</form>
+			{/*<div className="samples">
 			{samples.map(samples => (
 				<div key={samples._id} className="data" style={{display: "flex", flexDirection: "row", alignItems: "center"}}>
 					<div>
@@ -91,7 +93,7 @@ function App() {
 					&emsp;<button id={samples._id} onClick={handleDelete}>X</button>
 				</div>
 			))}
-			</div>
+			</div>*/}
 		</div>
 	);
 }
