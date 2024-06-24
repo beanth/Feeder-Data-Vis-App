@@ -3,7 +3,7 @@ import CamFeed from './CamFeed';
 import { LineChart, Line, Legend, Tooltip, XAxis, YAxis, CartesianGrid } from 'recharts';
 
 const API = "http://localhost:3001";
-const MAX_FOOD = 33000000;
+const MAX_FOOD = 32000000;
 const MIN_FOOD = 8000000;
 
 function App() {
@@ -27,7 +27,7 @@ function App() {
 				for (var i in data) {
 					data[i].time = new Date(data[i].time).toLocaleString([],
 						{ hour: '2-digit', minute: '2-digit' });
-					data[i].food = (data[i].food - MIN_FOOD) / MAX_FOOD * 100;
+					data[i].food = ((data[i].food - MIN_FOOD) / MAX_FOOD * 100).toFixed(1);
 				}
 				setSamples(data);
 			})
@@ -77,12 +77,12 @@ function App() {
 			<h1 style={{ color: "blue" }}>Cat Feeder</h1>
 			<LineChart width={730} height={400} data={samples}
 				margin={{ top: 30, right: 30, left: 30, bottom: 30 }}>
-				<CartesianGrid strokeDasharray="3 3"/>
-				<XAxis dataKey="time" angle={-25} textAnchor='end' height={50}/>
+				<CartesianGrid strokeDasharray="6 12"/>
+				<XAxis dataKey="time" angle={-25} textAnchor='end' height={55}/>
 				<YAxis dataKey="food" tickFormatter={ value => `${value}%` }/>
-				<Tooltip/>`
+				<Tooltip formatter={ value => `${value}%` }/>
 				<Legend/>
-				<Line type="linear" dataKey="food" stroke="blue"/>
+				<Line type="monotone" dataKey="food" stroke="blue"/>
 			</LineChart>
 			<CamFeed/>
 			<form onSubmit={handleSubmit}>
