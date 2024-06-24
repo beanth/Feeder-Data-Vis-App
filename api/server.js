@@ -64,7 +64,7 @@ router.get("/data/average", async (req, res) => {
 		});
 
 	while (from_date < to_date) {
-		const outer_range = from_date + 1000*60*60;
+		var outer_range = Math.min(from_date + 1000*60*60, to_date);
 		var datapoints = await Sample.aggregate([
 			{ $match : { 
 				time: { $gte: new Date(from_date), $lt: new Date(outer_range)},
@@ -77,6 +77,7 @@ router.get("/data/average", async (req, res) => {
 
 		if (datapoints !== undefined) {
 			datapoints.time = new Date(outer_range);
+			datapoints.food = Math.ceil(datapoints.food);
 			averages.push(datapoints);
 		}
 		from_date = outer_range;
