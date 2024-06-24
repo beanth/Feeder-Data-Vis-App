@@ -3,6 +3,8 @@ import CamFeed from './CamFeed';
 import { LineChart, Line, Legend, Tooltip, XAxis, YAxis, CartesianGrid } from 'recharts';
 
 const API = "http://localhost:3001";
+const MAX_FOOD = 33000000;
+const MIN_FOOD = 8000000;
 
 function App() {
 	const [samples, setSamples] = useState([]);
@@ -21,7 +23,14 @@ function App() {
 		//	OPTIMIZE QUERY TO ONLY FETCH MISSING DATAPOINTS
 		fetch(API + "/data/average")
 			.then(response => response.json())
-			.then(data => setSamples(data))
+			.then((data) => {
+				for (var i in data) {
+					data[i].time = new Date(data[i].time).toLocaleString([],
+						{ hour: '2-digit', minute: '2-digit' });
+					data[i].food = (data[i].food - MIN_FOOD) / MAX_FOOD * 100;
+				}
+				setSamples(data);
+			})
 			.catch(error => console.error("Error: ", error));
 	}
 
@@ -64,18 +73,18 @@ function App() {
 	}
 
 	return (
-		<div className="App">
-			<h1 style={{color: "blue"}}>Cat Feeder</h1>
-			<CamFeed/>
-			<LineChart width={730} height={250} data={samples}
+		<div className="App" style={{ margin: 10 }}>
+			<h1 style={{ color: "blue" }}>Cat Feeder</h1>
+			<LineChart width={730} height={400} data={samples}
 				margin={{ top: 30, right: 30, left: 30, bottom: 30 }}>
-				<CartesianGrid strokeDasharray="3 3" />
-				<XAxis dataKey="time"/>
-				<YAxis dataKey="food"/>
-				<Tooltip />
-				<Legend />
-				<Line type="linear" dataKey="food" stroke="#82ca9d" />
+				<CartesianGrid strokeDasharray="3 3"/>
+				<XAxis dataKey="time" angle={-25} textAnchor='end' height={50}/>
+				<YAxis dataKey="food" tickFormatter={ value => `${value}%` }/>
+				<Tooltip/>`
+				<Legend/>
+				<Line type="linear" dataKey="food" stroke="blue"/>
 			</LineChart>
+			<CamFeed/>
 			<form onSubmit={handleSubmit}>
 				<input type="datetime-local" value={textValue} name="time" onChange={e => setTextValue(e.target.value)}></input>
 				<input type="number" value={foodNumber} name="food" onChange={e => setFoodNumber(e.target.value)}></input>
