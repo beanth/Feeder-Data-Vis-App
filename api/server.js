@@ -18,7 +18,7 @@ async function getDataPoints() {
 		for (let i = 0; i < response.length; i++) {
 			const datapoint = new Sample({
 				food: response[i][1],
-				time: response[i][0]
+				time: new Date(response[i][0])
 			});
 
 			datapoint.save();
@@ -34,14 +34,49 @@ getDataPoints();
 
 mongoose.connect("mongodb://127.0.0.1:27017/")
 	.then(() => console.log("Connected to DB"))
-	.then(() => setInterval(getDataPoints, 1000 * 10)) // only want to start interval when we can properly store the data
+	//.then(() => setInterval(getDataPoints, 1000 * 10)) // only want to start interval when we can properly store the data
 	.catch((err) => console.error(err));
 
 const Sample = require("./models/Sample");
 
 router.get("/data", async (req, res) => {
-	const datapoints = await Sample.find().sort({"time": 1});
+	const to_date = await Sample.findOne().sort("-time")
+		.then((date) => {
+			return new Date(date.time).getTime();
+		});
+	const from_date = to_date - 1000*60*60*12;
+
+	const datapoints = await Sample.find({"time": {"$gte": from_date, "$lte": to_date}})
+		.sort("+time");
 	res.json(datapoints);
+});
+
+router.get("/data/average", async (req, res) => {
+	var averages = [];
+	var from_date = await Sample.findOne().sort("+time")
+		.then((date) => {
+			return new Date(date.time).getTime();
+		});
+
+	const to_date = await Sample.findOne().sort("-time")
+		.then((date) => {
+			return new Date(date.time).getTime();
+		});
+
+	while (from_date < to_date) {
+		const outer_range = from_date + 1000*60*60;
+		var datapoints = await Sample.aggregate([
+			{ $match : { time: {$gte: new Date(from_date), $lt: new Date(outer_range)} } },
+			{ $group: { _id: null, food: { $avg: "$food" } } }
+		]).then((data) => {
+			return data[0];
+		});
+		datapoints.time = new Date(outer_range);
+		averages.push(datapoints);
+		from_date = outer_range;
+	}
+
+	res.json(averages);
 });
 
 router.post("/data", async (req, res) => {
