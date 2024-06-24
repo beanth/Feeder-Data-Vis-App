@@ -18,7 +18,7 @@ async function getDataPoints() {
 		for (let i = 0; i < response.length; i++) {
 			const datapoint = new Sample({
 				food: response[i][1],
-				time: response[i][0]
+				time: new Date(response[i][0])
 			});
 
 			datapoint.save();
@@ -40,7 +40,14 @@ mongoose.connect("mongodb://127.0.0.1:27017/")
 const Sample = require("./models/Sample");
 
 router.get("/data", async (req, res) => {
-	const datapoints = await Sample.find().sort({"time": 1});
+	const to_date = await Sample.findOne().sort("-time")
+		.then((date) => {
+			return new Date(date.time).getTime();
+		});
+	const from_date = to_date - 1000*60*60*12;
+
+	const datapoints = await Sample.find({"time": {"$gte": from_date, "$lte": to_date}})
+		.sort("+time");
 	res.json(datapoints);
 });
 
@@ -66,6 +73,8 @@ router.get("/data/average", async (req, res) => {
 		]).then((data) => {
 			return data[0];
 		});
+
+
 		if (datapoints !== undefined) {
 			datapoints.time = new Date(outer_range);
 			averages.push(datapoints);
