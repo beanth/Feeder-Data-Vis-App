@@ -14,7 +14,7 @@ function App() {
 	}, []);
 
 	async function GetDataPoints() {
-		fetch(API + "/data")
+		fetch(API + "/data/average")
 			.then(response => response.json())
 			.then(data => setSamples(data))
 			.catch(error => console.error("Error: ", error));
