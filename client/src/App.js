@@ -1,6 +1,6 @@
 import { useState, useEffect, setState } from 'react';
 import CamFeed from './CamFeed';
-import { LineChart, Line, Legend, Tooltip, XAxis, YAxis, CartesianGrid } from 'recharts';
+import { LineChart, Line, Legend, Tooltip, XAxis, YAxis, CartesianGrid, ReferenceLine } from 'recharts';
 
 const API = "http://localhost:3001";
 const MAX_FOOD = 32000000;
@@ -10,7 +10,8 @@ function App() {
 	const [samples, setSamples] = useState([]);
 
 	const [foodNumber, setFoodNumber] = useState(13);
-	const [textValue, setTextValue] = useState("");
+	const [dateValue, setDateValue] = useState("");
+	const [refillAmt, setRefillAmt] = useState(20);
 	
 	useEffect(() => {
 		GetDataPoints();
@@ -54,7 +55,7 @@ function App() {
 		const newSamples = samples.concat(data);
 		setSamples(newSamples);
 		setFoodNumber(0);
-		setTextValue("");
+		setDateValue("");
 	}
 
 	async function handleDelete(e) {
@@ -80,13 +81,17 @@ function App() {
 				<CartesianGrid strokeDasharray="6 12"/>
 				<XAxis dataKey="time" angle={-25} textAnchor='end' height={55}/>
 				<YAxis dataKey="food" tickFormatter={ value => `${value}%` }/>
-				<Tooltip formatter={ value => `${value}%` }/>
+				<ReferenceLine y={refillAmt} position={"top"} label={{
+		          position: "bottom",
+		          value: "Refill threshold"
+		        }} stroke="#722F37" />
+				<Tooltip formatter={ value => `${ Math.round(value) }%` }/>
 				<Legend/>
 				<Line type="monotone" dataKey="food" stroke="blue"/>
 			</LineChart>
 			<CamFeed/>
 			<form onSubmit={handleSubmit}>
-				<input type="datetime-local" value={textValue} name="time" onChange={e => setTextValue(e.target.value)}></input>
+				<input type="datetime-local" value={dateValue} name="time" onChange={e => setDateValue(e.target.value)}></input>
 				<input type="number" value={foodNumber} name="food" onChange={e => setFoodNumber(e.target.value)}></input>
 				<br/>
 				<button type="submit">Submit</button>
