@@ -13,8 +13,7 @@ function App() {
 	const [dateValue, setDateValue] = useState("");
 	const [refillAmt, setRefillAmt] = useState(20);
 
-	var minDate, maxDate;
-	var domain = [0, 10];
+	//var minDate, maxDate;
 	
 	useEffect(() => {
 		GetDataPoints();
@@ -24,21 +23,20 @@ function App() {
 	async function GetDataPoints() {
 		// TODO:
 		//	OPTIMIZE QUERY TO ONLY FETCH MISSING DATAPOINTS
-		fetch(API + "/data/")
+		fetch(API + "/data/average")
 			.then(response => response.json())
 			.then((data) => {
 				for (var i in data) {
 					data[i].time = new Date(data[i].time);
-					if (maxDate === undefined || data[i].time.getTime() > maxDate.getTime())
+					/*if (maxDate === undefined || data[i].time.getTime() > maxDate.getTime())
 						maxDate = data[i].time;
 
 					if (minDate === undefined || data[i].time.getTime() < minDate.getTime())
-						minDate = data[i].time;
+						minDate = data[i].time;*/
 					//data[i].time = data[i].time.toLocaleString([],
 					//	{ timeZone: 'UTC', hour: 'numeric', minute: 'numeric', hour12: true });
 					data[i].food = ((data[i].food - MIN_FOOD) / MAX_FOOD * 100).toFixed(1);
 				}
-				//domain = [minDate.getTime(), maxDate.getTime()];
 				setSamples(data);
 			})
 			.catch(error => console.error("Error: ", error));
@@ -78,7 +76,9 @@ function App() {
 		})
 			.then(res => res.json())
 			.catch(error => console.error("Error: ", error));
-		//if (data !== null)
+
+		if (data !== null)
+			e.target.parentElement.remove();
 		//	setSamples(samples => samples.filter(sample => sample._id !== data._id));
 	}
 
@@ -91,7 +91,7 @@ function App() {
 				<XAxis dataKey="time" scale='time'  angle={-25}
 					textAnchor='end' height={55} tickFormatter={ value => value.toLocaleString([],
 						{ hour: 'numeric', minute: 'numeric', hour12: true }) }/>
-				<YAxis dataKey="food" tickFormatter={ value => `${value}%` }/>
+				<YAxis dataKey="food" domain={[0,100]} tickFormatter={ value => `${value}%` }/>
 				<ReferenceLine y={refillAmt} position={"top"} label={{
 		          position: "bottom",
 		          value: "Refill threshold"

@@ -1,7 +1,7 @@
 import React from 'react';
 import { TimedImage } from "react-timed-image";
 
-const IMG_API = "http://pi.local:5010";
+const IMG_API = "http://67.168.172.32:5010";//"http://pi.local:5010";
 
 function CamFeed() {
 	return (
