@@ -2,18 +2,15 @@ const express = require("express");
 const mongoose = require("mongoose"); // MIGRATE TO POSTGRESQL
 const cors = require("cors");
 
-var corsOptions = {
-	origin: 'http://localhost:3000',
-	optionsSuccessStatus: 200
-}
-
 const router = express();
 router.use(express.json());
 router.use(cors());
 
+const apiURI = "67.168.172.32";//"pi.local";
+
 async function getDataPoints() {
 	try {
-		const data = await fetch("http://pi.local:5010/data");
+		const data = await fetch("http://" + apiURI + ":5010/data");
 		const response = await data.json();
 		for (let i = 0; i < response.length; i++) {
 			const datapoint = new Sample({
@@ -29,14 +26,25 @@ async function getDataPoints() {
 	}
 }
 
-getDataPoints();
-
 mongoose.connect("mongodb://127.0.0.1:27017/")
 	.then(() => console.log("Connected to DB"))
+	.then(async () => {
+		const to_date = await Sample.findOne().sort("-time")
+			.then((date) => {
+				return new Date(date.time).getTime();
+			})
+			.catch((err) => console.error(err));
+
+		Sample.deleteMany({ time: { $lte: to_date - 1000*60*60*24*7 } })
+			.then(() => console.log("Deleted from a week ago"))
+			.catch((err) => console.error(err));
+	})
 	.then(() => setInterval(getDataPoints, 1000 * 10)) // only want to start interval when we can properly store the data
 	.catch((err) => console.error(err));
 
 const Sample = require("./models/Sample");
+
+getDataPoints();
 
 router.get("/data", async (req, res) => {
 	const to_date = await Sample.findOne().sort("-time")
@@ -46,7 +54,7 @@ router.get("/data", async (req, res) => {
 		.catch((err) => console.error(err));
 	const from_date = to_date - 1000*60*60*24*2;
 
-	const datapoints = await Sample.find({"time": {"$gte": from_date, "$lte": to_date}})
+	const datapoints = await Sample.find({ time: { $gte: from_date, $lte: to_date } })
 		.sort("+time")
 		.catch((err) => console.error(err));
 	res.json(datapoints);
