@@ -1,4 +1,4 @@
-import { useState, useEffect, setState } from 'react';
+import { useState, useEffect } from 'react';
 import CamFeed from './CamFeed';
 import { LineChart, Line, Legend, Tooltip, XAxis, YAxis, CartesianGrid, ReferenceLine } from 'recharts';
 
@@ -23,7 +23,7 @@ function App() {
 	async function GetDataPoints() {
 		// TODO:
 		//	OPTIMIZE QUERY TO ONLY FETCH MISSING DATAPOINTS
-		fetch(API + "/data/average")
+		fetch(API + "/data/")
 			.then(response => response.json())
 			.then((data) => {
 				for (var i in data) {
@@ -83,24 +83,27 @@ function App() {
 	}
 
 	return (
-		<div className="App" style={{ margin: 10 }}>
+		<div className="App" style={{ margin: 20 }}>
 			<h1 style={{ color: "blue" }}>Cat Feeder</h1>
-			<LineChart width={750} height={400} data={samples}
-				margin={{ top: 20, right: 20, bottom: 20 }}>
-				<CartesianGrid strokeDasharray="6 12"/>
-				<XAxis dataKey="time" scale='time'  angle={-25}
-					textAnchor='end' height={55} tickFormatter={ value => value.toLocaleString([],
+			<LineChart width={735} height={400} data={samples}
+				margin={{ top: 10, right: 5, bottom: 10 }}>
+				<CartesianGrid strokeDasharray="6 10"/>
+				<XAxis dataKey="time" angle={-25}
+					textAnchor='end' height={50} tickFormatter={ value => value.toLocaleString([],
 						{ hour: 'numeric', minute: 'numeric', hour12: true }) }/>
+				}
 				<YAxis dataKey="food" domain={[0,100]} tickFormatter={ value => `${value}%` }/>
 				<ReferenceLine y={refillAmt} position={"top"} label={{
 		          position: "bottom",
 		          value: "Refill threshold"
 		        }} stroke="#722F37" />
-				<Tooltip formatter={ value => `${ Math.round(value) }%` }/>
+				<Tooltip formatter={ value => `${ Math.round(value) }%` }
+					labelFormatter={label => label.toLocaleString([],
+						{ weekday: "short", month: "short", day: "numeric", hour: 'numeric', minute: 'numeric', hour12: true })}/>
 				<Legend/>
 				<Line type="monotone" dataKey="food" stroke="blue"/>
 			</LineChart>
-			<CamFeed/>
+			<CamFeed height="400"/>
 			<form onSubmit={handleSubmit}>
 				<input type="datetime-local" value={dateValue} name="time" onChange={e => setDateValue(e.target.value)}></input>
 				<input type="number" value={foodNumber} name="food" onChange={e => setFoodNumber(e.target.value)}></input>
