@@ -88,15 +88,26 @@ function App() {
 			<LineChart width={735} height={400} data={samples}
 				margin={{ top: 10, right: 5, bottom: 10 }}>
 				<CartesianGrid strokeDasharray="6 10"/>
-				<XAxis dataKey="time" angle={-25}
+				<XAxis dataKey="time" angle={-25} type="number" scale="time"
+					domain={samples.length !== 0 ? [samples[0].time.getTime(), samples[samples.length - 1].time.getTime()] : [0, 0]}
 					textAnchor='end' height={50} tickFormatter={ value => value.toLocaleString([],
 						{ hour: 'numeric', minute: 'numeric', hour12: true }) }/>
-				}
 				<YAxis dataKey="food" domain={[0,100]} tickFormatter={ value => `${value}%` }/>
 				<ReferenceLine y={refillAmt} position={"top"} label={{
 		          position: "bottom",
 		          value: "Refill threshold"
 		        }} stroke="#722F37" />
+				{samples.map((sample, index) => {
+					if (index < 1 || samples[index - 1].food - sample.food < 5)
+						return;
+					const time = sample.time.getTime();
+					samples.splice(index, 1);
+					return (
+						<ReferenceLine x={sample.time.getTime()} /*label={{
+			        		position: "top",
+			        		value: "Eating"
+			        	}}*/ stroke="gray" />
+				)})}
 				<Tooltip formatter={ value => `${ Math.round(value) }%` }
 					labelFormatter={label => label.toLocaleString([],
 						{ weekday: "short", month: "short", day: "numeric", hour: 'numeric', minute: 'numeric', hour12: true })}/>
