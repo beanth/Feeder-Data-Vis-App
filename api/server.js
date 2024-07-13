@@ -47,16 +47,27 @@ const Sample = require("./models/Sample");
 getDataPoints();
 
 router.get("/data", async (req, res) => {
-	const to_date = await Sample.findOne().sort("-time")
-		.then((date) => {
-			return new Date(date.time).getTime();
-		})
-		.catch((err) => console.error(err));
-	const from_date = to_date - 1000*60*60*24*2;
+	var datapoints = await Sample.aggregate([
+		  { $group: {
+		      _id: {
+		        time: {
+		          $dateTrunc: {
+		            date: "$time",
+		            unit: "minute",
+		            binSize: 5
+		          }
+		        },
+		      },
+		      food: {$avg: "$food"},
+		  } },
+		  { $project: {
+		  	_id: 0,
+		  	food: "$food",
+		  	time: "$_id.time"
+		  } },
+		  { $sort: { time: 1 } }
+	]);
 
-	const datapoints = await Sample.find({ time: { $gte: from_date, $lte: to_date } })
-		.sort("+time")
-		.catch((err) => console.error(err));
 	res.json(datapoints);
 });
 
@@ -64,7 +75,11 @@ router.get("/data/average", async (req, res) => {
 	var averages = [];
 	var from_date = await Sample.findOne().sort("+time")
 		.then((date) => {
-			return new Date(date.time).getTime();
+			var dateObj = new Date(date.time);
+			dateObj.setMinutes(0);
+			dateObj.setSeconds(0);
+			dateObj.setMilliseconds(0);
+			return dateObj.getTime();
 		})
 		.catch((err) => console.error(err));
 
@@ -79,7 +94,7 @@ router.get("/data/average", async (req, res) => {
 		var datapoints = await Sample.aggregate([
 			{ $match : { 
 				time: { $gte: new Date(from_date), $lt: new Date(outer_range)},
-				food: { $gte: 6000000, $lt: 40000000 }
+				food: { $gte: 6000000 }//, $lt: 40000000 }
 				//5000000
 			} },
 			{ $group: { _id: null, food: { $avg: "$food" } } }
