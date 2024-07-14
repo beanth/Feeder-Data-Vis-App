@@ -8,6 +8,7 @@ const MIN_FOOD = 6000000;//8000000;
 
 function App() {
 	const [samples, setSamples] = useState([]);
+	const [referenceLines, setReferenceLines] = useState([]);
 
 	const [foodNumber, setFoodNumber] = useState(13);
 	const [dateValue, setDateValue] = useState("");
@@ -23,21 +24,29 @@ function App() {
 	async function GetDataPoints() {
 		// TODO:
 		//	OPTIMIZE QUERY TO ONLY FETCH MISSING DATAPOINTS
+		var referenceLines = [];
 		fetch(API + "/data/")
 			.then(response => response.json())
-			.then((data) => {
-				for (var i in data) {
-					data[i].time = new Date(data[i].time);
-					/*if (maxDate === undefined || data[i].time.getTime() > maxDate.getTime())
-						maxDate = data[i].time;
+			.then((samples) => {
+				for (var i in samples) {
+					samples[i].time = new Date(samples[i].time);
+					samples[i].food = ((samples[i].food - MIN_FOOD) / MAX_FOOD * 100).toFixed(1);
 
-					if (minDate === undefined || data[i].time.getTime() < minDate.getTime())
-						minDate = data[i].time;*/
-					//data[i].time = data[i].time.toLocaleString([],
-					//	{ timeZone: 'UTC', hour: 'numeric', minute: 'numeric', hour12: true });
-					data[i].food = ((data[i].food - MIN_FOOD) / MAX_FOOD * 100).toFixed(1);
+					if (i < 1)
+						continue;
+					const slope = (samples[i].food - samples[i - 1].food) / (samples[i].time - samples[i - 1].time);
+					if (slope > -.1*10 ** -3)
+						continue;
+					if (referenceLines[referenceLines.length - 1] === samples[i - 1].time) {
+						referenceLines[referenceLines.length - 1] = samples[i].time;
+						continue;
+					}
+					referenceLines.push(samples[i].time)
+					//samples.splice(i, 1);
 				}
-				setSamples(data);
+				setSamples(samples);
+				setReferenceLines(referenceLines);
+				console.log(referenceLines);
 			})
 			.catch(error => console.error("Error: ", error));
 	}
@@ -82,6 +91,8 @@ function App() {
 		//	setSamples(samples => samples.filter(sample => sample._id !== data._id));
 	}
 
+	var maxSlope = -99;
+
 	return (
 		<div className="App" style={{ margin: 20 }}>
 			<h1 style={{ color: "blue" }}>Cat Feeder</h1>
@@ -97,17 +108,30 @@ function App() {
 		          position: "bottom",
 		          value: "Refill threshold"
 		        }} stroke="#722F37" />
-				{samples.map((sample, index) => {
-					if (index < 1 || samples[index - 1].food - sample.food < 5)
+				{/*samples.map((sample, index) => {
+					if (index < 1 || samples[index - 1].food - sample.food < 1)
 						return;
-					const time = sample.time.getTime();
+					const slope = (sample.food - samples[index - 1].food) / (sample.time - samples[index - 1].time);
+					if (slope > -6*10 ** -7)
+						return;
+					if (slope > maxSlope)
+						maxSlope = slope;
 					samples.splice(index, 1);
 					return (
-						<ReferenceLine x={sample.time.getTime()} /*label={{
+						<ReferenceLine x={sample.time.getTime()} label={{
 			        		position: "top",
-			        		value: "Eating"
-			        	}}*/ stroke="gray" />
-				)})}
+			        		value: slope
+			        	}} stroke="gray" />
+				)})*/
+				referenceLines.map((ref, index) => {
+					return (
+						<ReferenceLine x={ref.getTime()} label={{
+			        		position: "top",
+			        		value: ref,
+			        		fontSize: 5,
+			        	}} stroke="gray" strokeWidth="4" />
+				)})
+		    	}
 				<Tooltip formatter={ value => `${ Math.round(value) }%` }
 					labelFormatter={label => label.toLocaleString([],
 						{ weekday: "short", month: "short", day: "numeric", hour: 'numeric', minute: 'numeric', hour12: true })}/>
